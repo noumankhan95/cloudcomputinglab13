@@ -13,8 +13,11 @@ phases:
       - npm run build
   post_build:
     commands:
-      - echo Deploying to EC2 instance...
-      - echo "Creating /cloudcomputinglab13 if it doesn't exist..."
+    - echo "Creating /cloudcomputinglab13 if it doesn't exist..."
+    - mkdir -p ~/.ssh
+    - echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 400 ~/.ssh/id_rsa
+    - cat ~/.ssh/id_rsa  
       - ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo mkdir -p /cloudcomputinglab13"
       - mkdir -p ~/.ssh
       - echo "$PRIVATE_KEY" > ~/.ssh/id_rsa

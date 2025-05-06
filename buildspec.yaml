@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - npm install
+  build:
+    commands:
+      - npm run build
+  post_build:
+    commands:
+      - echo Deploying to EC2...
+      - mkdir -p ~/.ssh
+      - echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
+      - chmod 400 ~/.ssh/id_rsa
+      - ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "rm -rf /var/www/html/*"
+      - scp -r build/* $SSH_USER@$SSH_HOST:/tmp/build/
+      - ssh $SSH_USER@$SSH_HOST "sudo cp -r /tmp/build/* /var/www/html && sudo systemctl restart nginx"
+
+env:
+  secrets-manager:
+    SSH_HOST: ec2-ssh-credentials:host
+    SSH_USER: ec2-ssh-credentials:user
+    PRIVATE_KEY: ec2-ssh-credentials:private_key

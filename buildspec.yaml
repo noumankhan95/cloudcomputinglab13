@@ -14,13 +14,17 @@ phases:
   post_build:
     commands:
       - echo Deploying to EC2 instance...
+      - echo "Creating /cloudcomputinglab13 if it doesn't exist..."
+      - ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo mkdir -p /cloudcomputinglab13"
       - mkdir -p ~/.ssh
       - echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
       - chmod 400 ~/.ssh/id_rsa
-      - ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo rm -rf /var/www/html/*"
-      - scp -o StrictHostKeyChecking=no -r build/* "$SSH_USER@$SSH_HOST:/tmp/build/"
-      - ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo cp -r /tmp/build/* /var/www/html && sudo systemctl restart nginx"
-
+      - echo "Attempting to SSH into the EC2 instance..."
+      - ssh -v -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo rm -rf /cloudcomputinglab13/*"
+      - echo "Attempting to copy files to EC2..."
+      - scp -v -o StrictHostKeyChecking=no -r build/* "$SSH_USER@$SSH_HOST:/tmp/build/"
+      - echo "Attempting to move files and restart nginx..."
+      - ssh -v -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo cp -r /tmp/build/* /cloudcomputinglab13 && sudo systemctl restart nginx"
 env:
   secrets-manager:
     SSH_HOST: ec2-ssh-credentials:host

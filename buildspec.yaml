@@ -5,29 +5,35 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
-      - echo Installing dependencies...
+      - echo "Installing dependencies..."
       - npm install
+
   build:
     commands:
-      - echo Building the React app...
+      - echo "Building the React app..."
       - npm run build
+
   post_build:
     commands:
-      - echo "Decoding private key from Secrets Manager..."
+      - echo "Setting up SSH access..."
       - mkdir -p ~/.ssh
-      - echo $PRIVATE_KEY | base64 -d > ~/.ssh/id_rsa
+      - echo "$PRIVATE_KEY" | base64 -d > ~/.ssh/id_rsa
       - chmod 400 ~/.ssh/id_rsa
-      - echo "Connecting to EC2..."
-      - ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo mkdir -p /cloudcomputinglab13"
-      - mkdir -p ~/.ssh
-      - echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
-      - chmod 400 ~/.ssh/id_rsa
-      - echo "Attempting to SSH into the EC2 instance..."
-      - ssh -v -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo rm -rf /cloudcomputinglab13/*"
-      - echo "Attempting to copy files to EC2..."
-      - scp -v -o StrictHostKeyChecking=no -r build/* "$SSH_USER@$SSH_HOST:/tmp/build/"
-      - echo "Attempting to move files and restart nginx..."
-      - ssh -v -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo cp -r /tmp/build/* /cloudcomputinglab13 && sudo systemctl restart nginx"
+      - echo "Host *" > ~/.ssh/config
+      - echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+
+      - echo "Creating deployment directory on EC2..."
+      - ssh "$SSH_USER@$SSH_HOST" "sudo mkdir -p /cloudcomputinglab13"
+
+      - echo "Cleaning old files from EC2..."
+      - ssh "$SSH_USER@$SSH_HOST" "sudo rm -rf /cloudcomputinglab13/*"
+
+      - echo "Copying new build files to EC2..."
+      - scp -r build/* "$SSH_USER@$SSH_HOST:/tmp/build/"
+
+      - echo "Deploying to final directory and restarting nginx..."
+      - ssh "$SSH_USER@$SSH_HOST" "sudo cp -r /tmp/build/* /cloudcomputinglab13 && sudo systemctl restart nginx"
+
 env:
   secrets-manager:
     SSH_HOST: ec2-ssh-credentials:host

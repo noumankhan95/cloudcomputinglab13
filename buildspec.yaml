@@ -5,19 +5,21 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
+      - echo Installing dependencies...
       - npm install
   build:
     commands:
+      - echo Building the React app...
       - npm run build
   post_build:
     commands:
-      - echo Deploying to EC2...
+      - echo Deploying to EC2 instance...
       - mkdir -p ~/.ssh
       - echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
       - chmod 400 ~/.ssh/id_rsa
-      - ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "rm -rf /var/www/html/*"
-      - scp -r build/* $SSH_USER@$SSH_HOST:/tmp/build/
-      - ssh $SSH_USER@$SSH_HOST "sudo cp -r /tmp/build/* /var/www/html && sudo systemctl restart nginx"
+      - ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo rm -rf /var/www/html/*"
+      - scp -o StrictHostKeyChecking=no -r build/* "$SSH_USER@$SSH_HOST:/tmp/build/"
+      - ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo cp -r /tmp/build/* /var/www/html && sudo systemctl restart nginx"
 
 env:
   secrets-manager:

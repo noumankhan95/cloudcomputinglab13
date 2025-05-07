@@ -18,6 +18,7 @@ phases:
       - cp -r build/* deployment/
       - cp appspec.yml deployment/
       - cp -r scripts deployment/
+      - chmod +x scripts/restart_nginx.sh
 
 artifacts:
   files:

@@ -9,27 +9,16 @@ phases:
       - npm install
   build:
     commands:
-      - echo Building the React app...
+      - echo Building the app...
       - npm run build
   post_build:
     commands:
-      - echo "Decoding private key from Secrets Manager..."
-      - mkdir -p ~/.ssh
-      - echo $PRIVATE_KEY | base64 -d > ~/.ssh/id_rsa
-      - chmod 400 ~/.ssh/id_rsa
-      - echo "Connecting to EC2..."
-      - ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo mkdir -p /cloudcomputinglab13"
-      - mkdir -p ~/.ssh
-      - echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
-      - chmod 400 ~/.ssh/id_rsa
-      - echo "Attempting to SSH into the EC2 instance..."
-      - ssh -v -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo rm -rf /cloudcomputinglab13/*"
-      - echo "Attempting to copy files to EC2..."
-      - scp -v -o StrictHostKeyChecking=no -r build/* "$SSH_USER@$SSH_HOST:/tmp/build/"
-      - echo "Attempting to move files and restart nginx..."
-      - ssh -v -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "sudo cp -r /tmp/build/* /cloudcomputinglab13 && sudo systemctl restart nginx"
-env:
-  secrets-manager:
-    SSH_HOST: ec2-ssh-credentials:host
-    SSH_USER: ec2-ssh-credentials:user
-    PRIVATE_KEY: ec2-ssh-credentials:private_key
+      - echo Preparing artifacts...
+      - mkdir -p deployment
+      - cp -r build/* deployment/
+      - cp appspec.yml deployment/
+      - cp -r scripts deployment/
+
+artifacts:
+  files:
+    - deployment/**/*

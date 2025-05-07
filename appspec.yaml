@@ -2,13 +2,9 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /var/www/html
-    overwrite: true
-
+    destination: /home/ec2-user/cloudcomputinglab13
 hooks:
   AfterInstall:
-    - location: scripts/after_install.sh
-      timeout: 180
+    - location: scripts/restart_nginx.sh
+      timeout: 60
       runas: root
- 
- 

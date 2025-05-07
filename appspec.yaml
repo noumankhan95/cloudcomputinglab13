@@ -1,8 +1,10 @@
 version: 0.0
 os: linux
+
 files:
   - source: /
     destination: /home/ec2-user/cloudcomputinglab13
+
 hooks:
   AfterInstall:
     - location: scripts/restart_nginx.sh

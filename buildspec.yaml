@@ -17,8 +17,10 @@ phases:
       - mkdir -p deployment
       - cp -r build/* deployment/
       - cp appspec.yaml deployment/
-      - cp -r scripts deployment/
-      - chmod +x scripts/restart_nginx.sh
+      - mkdir -p deployment/scripts
+      - cp scripts/restart_nginx.sh deployment/scripts/
+      - chmod +x deployment/scripts/restart_nginx.sh
+
 
 artifacts:
   files:

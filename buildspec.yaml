@@ -16,7 +16,6 @@ phases:
       - echo Preparing artifacts for deployment...
       - mkdir -p scripts
       - cp -r build/* .
-      - cp appspec.yaml .
       - chmod +x scripts/restart_nginx.sh
 
 artifacts:
